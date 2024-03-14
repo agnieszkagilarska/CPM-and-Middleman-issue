@@ -33,11 +33,11 @@ Sequence_b = [item[2][0] for item in Table]
 Sequence_e = [item[2][1] for item in Table]
         
 # Driver code
-if __name__ == '__main__':
-    cpath = CriticalPath()
-    for i in range(len(Table)-1): cpath.add_node(i)
+# if __name__ == '__main__':
+#     cpath = CriticalPath()
+#     for i in range(len(Table)-1): cpath.add_node(i)
     
-    cpath.add_edges(Sequence_b, Sequence_e, Duration)
-    cpath._print()
-    print(cpath.longest_path())
-    print(cpath.add_action_names(Action, Sequence))    
+#     cpath.add_edges(Sequence_b, Sequence_e, Duration)
+#     cpath._print()
+#     print(cpath.longest_path())
+#     print(cpath.add_action_names(Action, Sequence))    

@@ -1,4 +1,5 @@
 import tkinter as tk
+from tkinter import messagebox
 from tkinter import ttk
 
 class EntryPopup(ttk.Entry):
@@ -17,8 +18,7 @@ class EntryPopup(ttk.Entry):
         self.bind("<Return>", self.on_return)
         self.bind("<Control-a>", self.select_all)
         self.bind("<Escape>", lambda *ignore: self.destroy())
-
-
+        
     def on_return(self, event):
         rowid = self.tv.focus()
         vals = self.tv.item(rowid, 'values')
@@ -34,20 +34,49 @@ class EntryPopup(ttk.Entry):
         return 'break'
 
 def create_table(root):
+    global n_rows
     tree = ttk.Treeview(root, columns=("Column 1", "Column 2", "Column 3"), show="headings")
+    n_rows = 0
     tree.heading("Column 1", text="Czynnosc")
     tree.heading("Column 2", text="Czas trwania (dni)")
     tree.heading("Column 3", text="Następstwo zdarzen")
-        
+    
     tree.pack(expand=True, fill="both")
     tree.bind("<Double-1>", lambda event: onDoubleClick(event, tree))
 
     add_button = tk.Button(root, text="Dodaj wiersz", command=lambda: add_empty_row(tree))
     add_button.pack()
+    
+    delete_button = tk.Button(root, text="Usuń wiersz", command=lambda: delete(tree))
+    delete_button.pack()
+    
 
 def add_empty_row(tree):
+    global n_rows
     new_row = ("", "", "")
-    tree.insert("", "end", values=new_row)
+    if n_rows % 2 == 0:
+        tag = 'even'
+    else:
+        tag = 'odd'
+    tree.insert("", "end", values=new_row, tags=(tag))
+    n_rows += 1
+    tree.tag_configure('odd', background='#E8E8E8')
+    tree.tag_configure('even', background='#b0ceff')
+    
+def delete(tree):
+    global n_rows
+    try:
+        selected_item = tree.selection()[0] ## get selected item
+        tree.delete(selected_item)
+        n_rows-=1
+        
+        for i, child in enumerate(tree.get_children()):
+            if i % 2 == 0:
+                tag = 'even'
+            else:
+                tag = 'odd'
+    except:
+        messagebox.showerror("Błąd usuwania wiersza", "Zaznacz istniejący wiersz w tabeli.")
 
 def onDoubleClick(event, tree):
     try:  
