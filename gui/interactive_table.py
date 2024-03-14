@@ -1,6 +1,8 @@
 import tkinter as tk
 from tkinter import messagebox
 from tkinter import ttk
+import re
+from util.critical import CriticalPath
 
 class EntryPopup(ttk.Entry):
     def __init__(self, parent, iid, column, text, **kw):
@@ -37,9 +39,9 @@ def create_table(root):
     global n_rows
     tree = ttk.Treeview(root, columns=("Column 1", "Column 2", "Column 3"), show="headings")
     n_rows = 0
-    tree.heading("Column 1", text="Czynnosc")
-    tree.heading("Column 2", text="Czas trwania (dni)")
-    tree.heading("Column 3", text="Następstwo zdarzen")
+    tree.heading("Column 1", text="Czynnosc [str]")
+    tree.heading("Column 2", text="Czas trwania (dni) [int]")
+    tree.heading("Column 3", text="Następstwo zdarzen [int-int]")
     
     tree.pack(expand=True, fill="both")
     tree.bind("<Double-1>", lambda event: onDoubleClick(event, tree))
@@ -49,6 +51,10 @@ def create_table(root):
     
     delete_button = tk.Button(root, text="Usuń wiersz", command=lambda: delete(tree))
     delete_button.pack()
+    
+    accept_button = tk.Button(root, text="OK", command=lambda: calculate_cpath(tree))
+    accept_button.pack()
+    return tree
     
 
 def add_empty_row(tree):
@@ -75,7 +81,8 @@ def delete(tree):
                 tag = 'even'
             else:
                 tag = 'odd'
-    except:
+    except Exception as e:
+        print(e)
         messagebox.showerror("Błąd usuwania wiersza", "Zaznacz istniejący wiersz w tabeli.")
 
 def onDoubleClick(event, tree):
@@ -101,3 +108,45 @@ def onDoubleClick(event, tree):
 
 def on_entry_focus_out(event, tree):
     tree.entryPopup.on_return(event)
+    
+def get_table_info(tree):
+    def extract_numbers(s):
+        return re.findall(r'\d+', s)
+    
+    names = []
+    durations = []
+    sequences = []
+    for i, row in enumerate(tree.get_children()):
+        name, duration, sequence = tuple(tree.item(row)['values'])
+        # formatting
+        names.append(name)
+        
+        try:
+            durations.append(int(duration))
+        except Exception as e:
+            print(e)
+            messagebox.showerror("Błąd w formatowaniu", "Wpisz tylko liczby całkowite w czasie trwania.")
+        
+        try:
+            numbers = tuple(map(int, extract_numbers(sequence)))
+            if len(numbers)!=2: raise Exception("Błąd w formatowaniu. Wpisz tylko dwie liczby")
+            sequences.append(numbers)
+        except Exception as e:
+            print(e)
+            messagebox.showerror("Błąd w formatowaniu", "Wpisz tylko dwie liczby")
+    return [names, durations, sequences]
+
+def calculate_cpath(tree):
+    names, durations, sequences = get_table_info(tree)
+    
+    sequence_b = [item[0] for item in sequences]
+    sequence_e = [item[1] for item in sequences]
+    
+    cpath = CriticalPath()
+    for i in range(len(names)-1): cpath.add_node(i)
+    cpath.add_edges(sequence_b, sequence_e, durations)
+    
+    l_path = cpath.longest_path()
+    path, length = cpath.add_action_names(names, sequences)
+    
+    messagebox.showinfo("Results", f"path: {path}, length: {length}")
