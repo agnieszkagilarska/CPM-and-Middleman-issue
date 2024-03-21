@@ -45,15 +45,21 @@ def create_table(root):
     
     tree.pack(expand=True, fill="both")
     tree.bind("<Double-1>", lambda event: onDoubleClick(event, tree))
+    tree.tag_configure('odd', background='#696969')
+    tree.tag_configure('even', background='#3a3a3a')
 
-    add_button = tk.Button(root, text="Dodaj wiersz", command=lambda: add_empty_row(tree))
-    add_button.pack()
+    add_button = ttk.Button(root, text="Dodaj wiersz", command=lambda: add_empty_row(tree))
+    add_button.pack(side="left",padx=10, pady=10)
     
-    delete_button = tk.Button(root, text="Usuń wiersz", command=lambda: delete(tree))
-    delete_button.pack()
+    delete_button = ttk.Button(root, text="Usuń wiersz", command=lambda: delete(tree))
+    delete_button.pack(side="left",padx=10, pady=10)
     
-    accept_button = tk.Button(root, text="OK", command=lambda: calculate_cpath(tree))
-    accept_button.pack()
+    accept_button = ttk.Button(root, text="Generuj graf", command=lambda: calculate_cpath(tree))
+    accept_button.pack(side="right", padx=10, pady=10)
+
+    accept_button = ttk.Button(root, text="Generuj wykres Gantta", command=lambda: calculate_cpath(tree))
+    accept_button.pack(side="right", padx=10, pady=10)
+
     return tree
     
 
@@ -66,8 +72,7 @@ def add_empty_row(tree):
         tag = 'odd'
     tree.insert("", "end", values=new_row, tags=(tag))
     n_rows += 1
-    tree.tag_configure('odd', background='#E8E8E8')
-    tree.tag_configure('even', background='#b0ceff')
+    
     
 def delete(tree):
     global n_rows

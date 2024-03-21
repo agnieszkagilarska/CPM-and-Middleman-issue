@@ -1,9 +1,10 @@
 import tkinter as tk
+from tkinter import ttk
 from gui.gui import ApplicationGUI
 
 def main():
     root = tk.Tk()
-    root.title("CPM|Middleman-issue")
+    root.title("CPM | Middleman-issue")
 
     app_gui = ApplicationGUI(root)
     
