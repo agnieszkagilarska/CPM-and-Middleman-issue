@@ -45,7 +45,7 @@ def create_table(root):
     
     tree.pack(expand=True, fill="both")
     tree.bind("<Double-1>", lambda event: onDoubleClick(event, tree))
-    tree.tag_configure('odd', background='#696969')
+    tree.tag_configure('odd', background='#575757')
     tree.tag_configure('even', background='#3a3a3a')
 
     add_button = ttk.Button(root, text="Dodaj wiersz", command=lambda: add_empty_row(tree))
