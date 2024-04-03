@@ -31,6 +31,8 @@ for event in event_list:
     if R[event] == 0: #jeśli rezerwa czasowa = 0 --> należy do CP
         critical_path.append(event)
 
+# Kolorowanie krawędzi w zależności od należenia do ścieżki krytycznej
+edge_colors = ['green' if (u in critical_path and v in critical_path) else 'black' for u, v in Graph.edges()]
 
 position = nx.spring_layout(Graph)
 
@@ -38,10 +40,10 @@ node_colors = ['green' if node in critical_path else 'red' for node in Graph.nod
 
 plt.figure(figsize=(14, 7))
 
-nx.draw(Graph, position, with_labels=True, node_size=5000, node_color=node_colors, font_size=50, font_weight="bold", node_shape='o')  #rozmiar, wygląd wierzchołków
+nx.draw(Graph, position, with_labels=True, node_size=5000, node_color=node_colors, font_size=50, font_weight="bold", node_shape='o', edge_color=edge_colors)  #rozmiar, wygląd wierzchołków
 
 #wypisywanie wartości na krawędziach
-edge_labels = {(u, v): f" ({T[u]} days)" for u, v in Graph.edges()} 
+edge_labels = {(u, v): f" ({T[u]} days)" for u, v in Graph.edges()}
 nx.draw_networkx_edge_labels(Graph, position, edge_labels=edge_labels, font_color="blue")
 
 #wypisywanie wartości na węzłach
@@ -58,4 +60,3 @@ legend_elements = [
 
 plt.legend(handles=legend_elements, loc='upper left')
 plt.show()
-
