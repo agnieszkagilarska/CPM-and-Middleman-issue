@@ -141,7 +141,7 @@ class Node:
             self.residuum = None
     def __str__(self) -> str:
         return f"Node(nid={self.nid},es={self.es},ls={self.ls},prev_nodes={self.prev_nodes},next_nodes={self.next_nodes},residuum={self.residuum}"
-            
+                        
 class Action:
     def __init__(self, name, start_id, end_id, duration) -> None:
         self.name = name
@@ -199,6 +199,9 @@ class CPMNetwork:
                 self.end_id = m
         
     def calc_es_ls(self):
+        """
+        Calculate early start (ES) and late start (LS)
+        """
         def _return_next_nodes(nid):
             return self.node_dict[nid].next_nodes
         
