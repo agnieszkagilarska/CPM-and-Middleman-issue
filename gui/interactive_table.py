@@ -2,7 +2,11 @@ import tkinter as tk
 from tkinter import messagebox
 from tkinter import ttk
 import re
-from util.critical import CriticalPath
+from util.critical import CPMNetwork
+import networkx as nx
+import matplotlib.pyplot as plt
+from matplotlib.lines import Line2D
+
 
 class EntryPopup(ttk.Entry):
     def __init__(self, parent, iid, column, text, **kw):
@@ -54,7 +58,7 @@ def create_table(root):
     delete_button = ttk.Button(root, text="Usuń wiersz", command=lambda: delete(tree))
     delete_button.pack(side="left",padx=10, pady=10)
     
-    accept_button = ttk.Button(root, text="Generuj graf", command=lambda: calculate_cpath(tree))
+    accept_button = ttk.Button(root, text="Generuj graf", command=lambda: critical_path(tree))#calculate_cpath(tree))
     accept_button.pack(side="right", padx=10, pady=10)
 
     accept_button = ttk.Button(root, text="Generuj wykres Gantta", command=lambda: calculate_cpath(tree))
@@ -141,17 +145,79 @@ def get_table_info(tree):
             messagebox.showerror("Błąd w formatowaniu", "Wpisz tylko dwie liczby")
     return [names, durations, sequences]
 
+def critical_path(tree):
+    node_id, es, ls, r, node_sequence_ids, action_name, time = calculate_cpath(tree)
+    
+    graph_cpath(node_id, es, ls, r, node_sequence_ids, action_name, time)
+
 def calculate_cpath(tree):
     names, durations, sequences = get_table_info(tree)
     
     sequence_b = [item[0] for item in sequences]
     sequence_e = [item[1] for item in sequences]
     
-    cpath = CriticalPath()
-    for i in range(len(names)-1): cpath.add_node(i)
-    cpath.add_edges(sequence_b, sequence_e, durations)
+    network = CPMNetwork()
+    for i in range(len(names)):
+        network.create_action(names[i], sequence_b[i], sequence_e[i], durations[i])
+
+    network.print_actions()
+    network.create_nodes_from_actions()
+
+    network.print_nodes()
+    network.calc_es_ls()
+    network.print_nodes()
+    return network.get_data_for_graph()
+
     
-    l_path = cpath.longest_path()
-    path, length = cpath.add_action_names(names, sequences)
     
-    messagebox.showinfo("Results", f"path: {path}, length: {length}")
+def graph_cpath(node_id, es, ls, r, node_sequence_ids, action_name, time):
+    Graph = nx.DiGraph()
+
+    Graph.add_nodes_from(node_id) #węzły
+    Graph.add_edges_from(node_sequence_ids, action_name=action_name) #krawędzie
+    T = time #czas trwania
+    event_list = list(nx.topological_sort(Graph))
+
+    ES = es
+    EF = ls # wiem, to jest niepoprawne, ale tymczasowo zamiast ef jest ls TODO
+    R = r
+
+    # ------------------------------------------------------------------------------ nowe dane
+    #dodawanie wierzchołków do ścieżki krytycznej
+    critical_path = []
+    for event in event_list:
+        if R[event] == 0: #jeśli rezerwa czasowa = 0 --> należy do CP
+            critical_path.append(event)
+        
+    # Kolorowanie krawędzi w zależności od należenia do ścieżki krytycznej
+    edge_colors = ['green' if (u in critical_path and v in critical_path) else 'black' for u, v in Graph.edges()]
+    
+    position = nx.spring_layout(Graph)
+
+    node_colors = ['green' if node in critical_path else 'red' for node in Graph.nodes()] #kolorowanie węzłów w zależności od przynależności do CP
+
+    plt.figure(figsize=(14, 7))
+
+    nx.draw(Graph, position, with_labels=True, node_size=5000, node_color=node_colors, font_size=50, font_weight="bold", node_shape='o', edge_color=edge_colors)  #rozmiar, wygląd wierzchołków
+
+    #wypisywanie wartości na krawędziach
+    # poprawa -> T[(u, v)] z T[u]
+    edge_labels = {(u, v): f" ({T[(u, v)]} days)" for u, v in Graph.edges()}
+    nx.draw_networkx_edge_labels(Graph, position, edge_labels=edge_labels, font_color="blue")
+
+    #wypisywanie wartości na węzłach
+    for event in event_list:
+        plt.text(position[event][0], position[event][1], f"\nES: {ES[event]}\nEF: {EF[event]}\nR: {R[event]}\n", fontsize=10, ha='center', va='center', bbox=dict(facecolor='white', alpha=0.5, boxstyle='circle'))
+
+    #legenda
+    legend_elements = [
+        Line2D([0], [0], marker='o', color='w', label='Należy do ścieżki krytycznej', markerfacecolor='green', markersize=15),
+        Line2D([0], [0], marker='o', color='w', label='Nie należy do ścieżki krytycznej', markerfacecolor='red', markersize=15),
+        Line2D([0], [0], marker='', color='w', label='ES - Najwcześniejszy czas rozpoczęcia', markerfacecolor='black', markersize=15, linestyle='None'),
+        Line2D([0], [0], marker='', color='w', label='EF - Najwcześniejszy czas zakończenia', markerfacecolor='black', markersize=15, linestyle='None'),
+        Line2D([0], [0], marker='', color='w', label='R - Rezerwa czasowa', markerfacecolor='black', markersize=15, linestyle='None')]
+
+    plt.legend(handles=legend_elements, loc='upper left')
+    plt.show()
+    
+    messagebox.showinfo("Results", f"path {critical_path}, length: {ls[node_id[-1]]}")
