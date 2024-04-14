@@ -75,7 +75,7 @@ node_id, es, ls, r, node_sequence_ids, action_name, time = network.get_data_for_
 Graph = nx.DiGraph()
 
 Graph.add_nodes_from(node_id) #węzły
-Graph.add_edges_from(node_sequence_ids) #krawędzie
+Graph.add_edges_from(node_sequence_ids, action_name=action_name) #krawędzie
 T = time #czas trwania
 event_list = list(nx.topological_sort(Graph))
 
