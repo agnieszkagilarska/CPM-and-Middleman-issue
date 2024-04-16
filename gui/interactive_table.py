@@ -188,13 +188,22 @@ def calculate_cpath(tree):
     for i in range(len(names)):
         network.create_action(names[i], sequence_b[i], sequence_e[i], durations[i])
 
-    network.print_actions()
+    # network.print_actions()
     network.create_nodes_from_actions()
 
-    network.print_nodes()
-    network.calc_es_ls()
-    network.print_nodes()
-    return network.get_data_for_graph()
+    # network.print_nodes()
+
+    try:
+        network.validate_network()
+        network.calc_es_ls()
+        network.print_nodes()
+        return network.get_data_for_graph()
+    except Exception as e:
+        print(e)
+        messagebox.showerror("Error", e)
+        return None
+        
+
 
     
     
