@@ -1,11 +1,11 @@
 import tkinter as tk
-from tkinter import messagebox
-from tkinter import ttk
+from tkinter import messagebox, ttk, filedialog
 import re
 from util.critical import CPMNetwork
 import networkx as nx
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
+import pandas as pd
 
 
 class EntryPopup(ttk.Entry):
@@ -58,6 +58,9 @@ def create_table(root):
     delete_button = ttk.Button(root, text="Usuń wiersz", command=lambda: delete(tree))
     delete_button.pack(side="left",padx=10, pady=10)
     
+    import_button = ttk.Button(root, text="Importuj tabelę (csv)", command=lambda: import_table(root, tree))
+    import_button.pack(side="left",padx=10, pady=10)
+    
     accept_button = ttk.Button(root, text="Generuj graf", command=lambda: critical_path(tree))#calculate_cpath(tree))
     accept_button.pack(side="right", padx=10, pady=10)
 
@@ -93,6 +96,31 @@ def delete(tree):
     except Exception as e:
         print(e)
         messagebox.showerror("Błąd usuwania wiersza", "Zaznacz istniejący wiersz w tabeli.")
+        
+def import_table(root, tree):
+    global n_rows
+    if n_rows % 2 == 0:
+        tag = 'even'
+    else:
+        tag = 'odd'
+        
+    file_path = filedialog.askopenfilename(filetypes=[("CSV files", "*.csv"), ('All',"*.*")])
+    if file_path:
+        df = pd.read_csv(file_path, sep=',')
+        
+        for i, row in df.iterrows():
+            name = row[0]
+            duration = row[1]
+            sequence = row[2]
+            
+            new_row = (name, duration, sequence)
+            
+            tree.insert("", "end", values=new_row, tags=(tag))
+            n_rows+=1
+            
+    else:
+            messagebox.showerror("Error", "Nieprawidłowe wczytanie pliku csv")
+    ...
 
 def onDoubleClick(event, tree):
     try:  
