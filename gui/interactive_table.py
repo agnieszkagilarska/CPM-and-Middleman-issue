@@ -220,7 +220,7 @@ def gantt_chart(node_id, es, ls, r, node_sequence_ids, action_name, time, tree):
     fig, ax = plt.subplots(figsize=(13, 7))
     ax.set_facecolor('lightgrey')
     
-    print({(u, v):T[(u, v)] for u, v in node_sequence_ids})
+
     sorted_zip = sorted(zip(node_sequence_ids, action_name), key=lambda x: x[1])
     for action, action_n in sorted_zip:
         u, v = action
