@@ -6,7 +6,7 @@ import networkx as nx
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
 import pandas as pd
-
+import matplotlib.pyplot as plt
 
 class EntryPopup(ttk.Entry):
     def __init__(self, parent, iid, column, text, **kw):
@@ -49,7 +49,7 @@ def create_table(root):
     
     tree.pack(expand=True, fill="both")
     tree.bind("<Double-1>", lambda event: onDoubleClick(event, tree))
-    tree.tag_configure('odd', background='#696969')
+    tree.tag_configure('odd', background='#575757')
     tree.tag_configure('even', background='#3a3a3a')
 
     add_button = ttk.Button(root, text="Dodaj wiersz", command=lambda: add_empty_row(tree))
@@ -64,7 +64,7 @@ def create_table(root):
     accept_button = ttk.Button(root, text="Generuj graf", command=lambda: critical_path(tree))#calculate_cpath(tree))
     accept_button.pack(side="right", padx=10, pady=10)
 
-    accept_button = ttk.Button(root, text="Generuj wykres Gantta", command=lambda: calculate_cpath(tree))
+    accept_button = ttk.Button(root, text="Generuj wykres Gantta", command=lambda: gantt(tree))
     accept_button.pack(side="right", padx=10, pady=10)
 
     return tree
@@ -178,6 +178,11 @@ def critical_path(tree):
     
     graph_cpath(node_id, es, ls, r, node_sequence_ids, action_name, time)
 
+def gantt(tree):
+    node_id, es, ls, r, node_sequence_ids, action_name, time = calculate_cpath(tree)
+    
+    gantt_chart(node_id, es, ls, r, node_sequence_ids, action_name, time, tree)    
+
 def calculate_cpath(tree):
     names, durations, sequences = get_table_info(tree)
     
@@ -205,7 +210,34 @@ def calculate_cpath(tree):
         
 
 
+def gantt_chart(node_id, es, ls, r, node_sequence_ids, action_name, time, tree):
+
+    ES = es
+    EF = ls
+    R = r
+    T = time
+
+    fig, ax = plt.subplots(figsize=(13, 7))
+    ax.set_facecolor('lightgrey')
     
+    print({(u, v):T[(u, v)] for u, v in node_sequence_ids})
+    sorted_zip = sorted(zip(node_sequence_ids, action_name), key=lambda x: x[1])
+    for action, action_n in sorted_zip:
+        u, v = action
+        ax.barh(action_n, width= T[(u, v)] , left=ES[u], color='lightgreen', edgecolor='black', linewidth=2)
+        ax.text(ES[u] + T[(u, v)]/2, action_n, f"{action_n} ({T[(u, v)]} day(s))", ha='center', va='center', color='black', fontsize=8)
+        ax.barh(action_n, width= T[(u, v)] , left=EF[u], color='lightblue', edgecolor='black', linewidth=2)
+        # ax.annotate('', xy=(ES[u] + T[(u, v)], action_n), xytext=(ES[v], action_n),arrowprops=dict(facecolor='black', shrink=0.05, width=0.5)) 
+                
+
+    ax.set_xlabel('Czas trwania')
+    ax.set_ylabel('Zadania')
+    ax.set_title('Wykres Gantta')
+    ax.grid(True)
+    ax.invert_yaxis()
+
+    plt.show()
+        
     
 def graph_cpath(node_id, es, ls, r, node_sequence_ids, action_name, time):
     Graph = nx.DiGraph()
