@@ -198,6 +198,27 @@ class CPMNetwork:
             if m not in self.sequence_b:
                 self.end_id = m
         
+    def validate_network(self):
+        """
+        Check if network has multiple starts or ends.
+        """
+        start_nodes = [node for node in self.nodes if len(node.prev_nodes) == 0]
+        end_nodes = [node for node in self.nodes if len(node.next_nodes) == 0]
+
+        err_start_nodes, err_end_nodes = "", ""
+        _start_err, _end_err, _and = False, False, ""
+        if len(start_nodes) != 1:
+            err_start_nodes = f" {len(start_nodes)} start nodes"
+            _start_err = True
+
+        if len(end_nodes) != 1:
+            err_end_nodes = f" {len(end_nodes)} end nodes"
+            _end_err = True
+            
+        if _start_err and _end_err: _and = " and"
+        
+        if _start_err or _end_err: raise ValueError(f"Network has{err_start_nodes}{_and}{err_end_nodes}.")
+        
     def calc_es_ls(self):
         """
         Calculate early start (ES) and late start (LS)
