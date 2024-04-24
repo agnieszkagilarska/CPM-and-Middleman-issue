@@ -230,8 +230,8 @@ def gantt_chart(node_id, es, ls, r, node_sequence_ids, action_name, time, tree):
         ax.barh(action_n, width= T[(u, v)] , left=EF[u], color='lightblue', edgecolor='black', linewidth=2)
         # ax.annotate('', xy=(ES[u] + T[(u, v)], action_n), xytext=(ES[v], action_n),arrowprops=dict(facecolor='black', shrink=0.05, width=0.5)) 
                 
-    green_patch = mpatches.Patch(color='lightgreen', label='ASAP - Jak najszybciej możliwe')
-    blue_patch = mpatches.Patch(color='lightblue', label='ALAP - Jak najpóźniej możliwe')
+    green_patch = mpatches.Patch(color='lightgreen', label='ASAP - Jak najszybciej możliwe.')
+    blue_patch = mpatches.Patch(color='lightblue', label='ALAP - Jak najpóźniej możliwe.')
     ax.legend(handles=[green_patch, blue_patch], loc='upper right')
 
     ax.set_xlabel('Czas trwania')
