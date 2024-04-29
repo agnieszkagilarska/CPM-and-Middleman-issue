@@ -280,14 +280,14 @@ def graph_cpath(node_id, es, ls, r, node_sequence_ids, action_name, time):
 
     #wypisywanie wartości na węzłach
     for event in event_list:
-        plt.text(position[event][0], position[event][1], f"\nES: {ES[event]}\nEF: {EF[event]}\nR: {R[event]}\n", fontsize=10, ha='center', va='center', bbox=dict(facecolor='white', alpha=0.5, boxstyle='circle'))
+        plt.text(position[event][0], position[event][1], f"\nES: {ES[event]}\nLS: {EF[event]}\nR: {R[event]}\n", fontsize=10, ha='center', va='center', bbox=dict(facecolor='white', alpha=0.5, boxstyle='circle'))
 
     #legenda
     legend_elements = [
         Line2D([0], [0], marker='o', color='w', label='Należy do ścieżki krytycznej', markerfacecolor='green', markersize=15),
         Line2D([0], [0], marker='o', color='w', label='Nie należy do ścieżki krytycznej', markerfacecolor='red', markersize=15),
         Line2D([0], [0], marker='', color='w', label='ES - Najwcześniejszy czas rozpoczęcia', markerfacecolor='black', markersize=15, linestyle='None'),
-        Line2D([0], [0], marker='', color='w', label='EF - Najwcześniejszy czas zakończenia', markerfacecolor='black', markersize=15, linestyle='None'),
+        Line2D([0], [0], marker='', color='w', label='LS - Najpóźniejszy czas rozpoczęcia', markerfacecolor='black', markersize=15, linestyle='None'),
         Line2D([0], [0], marker='', color='w', label='R - Rezerwa czasowa', markerfacecolor='black', markersize=15, linestyle='None')]
 
     plt.legend(handles=legend_elements, loc='upper left')
