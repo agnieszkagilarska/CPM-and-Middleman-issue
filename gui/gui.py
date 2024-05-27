@@ -3,6 +3,7 @@ import tkinter as tk
 from tkinter import ttk
 from gui.interactive_table import create_table
 from ttkthemes import ThemedStyle
+from gui.middleman_calculations import generate_fields_and_calculate
 
 class ApplicationGUI:
     def __init__(self, root):
@@ -43,7 +44,10 @@ class ApplicationGUI:
 
     def middleman_button_click(self):
         self.clear_window()
-        self.label.config(text="Kliknięto przycisk!")
+        self.configure_theme()
+        self.back_button = ttk.Button(self.root, text="Back", command=self.create_entrypage, width=20)
+        self.back_button.pack(side="left", padx=10, pady=10)
+        generate_fields_and_calculate(self.root)
 
     def clear_window(self):
         for widget in self.root.winfo_children():
