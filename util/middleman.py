@@ -39,6 +39,7 @@ class MiddleMan:
         supp_sum, dmnd_sum = self.supply_demand_sum()
         
         if supp_sum != dmnd_sum:
+            # print("Supply != Demand")
             self.unit_profits = np.pad(self.unit_profits, ((0, 1), (0, 1)), 'constant', constant_values=0)
             self.transport_cost_matrix = np.pad(self.transport_cost_matrix, ((0, 1), (0, 1)), 'constant', constant_values=0)
             self.suppliers.append(('DF', dmnd_sum, 0))
@@ -46,9 +47,9 @@ class MiddleMan:
         
         self.sales, supp, recv = self.sales_matrix()
         alphas, betas = self._calculate_alpha_beta()
-        deltas = self.calculate_deltas(alphas, betas)
+        self.deltas = self.calculate_deltas(alphas, betas)
         
-        if np.any(deltas > 0):
+        if np.any(self.deltas[:-1, :-1] > 0):
             return "Suboptimal"
         else:
             return "Optimal"
@@ -79,9 +80,9 @@ class MiddleMan:
         return supp_sum, dmnd_sum
     
     def calc_sorted_indices(self):
-        indices = np.argsort(self.unit_profits, axis=None)[::-1]
-        indices = np.unravel_index(indices, self.unit_profits.shape)
-        return indices
+        self.indices = np.argsort(self.unit_profits, axis=None)[::-1]
+        self.indices = np.unravel_index(self.indices, self.unit_profits.shape)
+        return self.indices
     
     def sales_matrix(self):
         suppliers_cpy = [list(tup) for tup in self.suppliers]
@@ -93,7 +94,9 @@ class MiddleMan:
             unit_profit = self.unit_profits[idx, jdx]
             supp_name, supply, cost = suppliers_cpy[idx]
             recv_name, demand, price = receivers_cpy[jdx]
-            if supply == 0 or demand == 0:
+            
+            # unit_profit < 0 -> middleman loses on this transaction.
+            if supply == 0 or demand == 0 or unit_profit < 0:
                 continue
             
             supply_after = supply - demand
@@ -119,7 +122,7 @@ class MiddleMan:
                 unit_profit = self.unit_profits[idx, jdx]
                 supp_name, supply, cost = suppliers_cpy[idx]
                 recv_name, demand, price = receivers_cpy[jdx]
-                if supply == 0 or demand == 0:
+                if supply == 0 or demand == 0 or unit_profit < 0:
                     continue
                 
                 supply_after = supply - demand
@@ -146,7 +149,7 @@ class MiddleMan:
     def _calculate_alpha_beta(self):
         mask = self.sales[:-1, :-1] !=0
         masked_array = (self.unit_profits[:-1, :-1] * mask)
-
+        
         A = []
         B = []
         for i in range(mask.shape[0]):
