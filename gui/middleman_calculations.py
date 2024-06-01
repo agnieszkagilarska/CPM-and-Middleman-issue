@@ -93,10 +93,12 @@ def generate_fields_and_calculate(root):
 
         print(mm.add_supplier, mm.add_receiver, mm.add_transport_matrix)
 
-        # Placeholder for actual calculation logic
         total_profit = mm.calculate_overall_return()
-        unit_costs = mm.unit_profits  # Placeholder
-        optimal_quantities = mm.sales  # Placeholder
+        unit_costs = mm.unit_profits  
+        optimal_quantities = mm.sales 
+        total_purchase_cost = np.sum((mm.sales[:-1, :-1].T * [supp[2] for supp in mm.suppliers][:-1]).T)
+        total_transport_cost = np.sum(mm.sales[:-1,:-1] * mm.transport_cost_matrix[:-1,:-1]) 
+        total_revenue = np.sum(mm.sales[:-1, :-1] * mm.transport_cost_matrix[:-1, :-1]) + np.sum((mm.sales[:-1, :-1].T * [supp[2] for supp in mm.suppliers][:-1]).T)+ mm.calculate_overall_return()
 
         # Clear previous results
         for widget in result_frame.winfo_children():
@@ -104,7 +106,13 @@ def generate_fields_and_calculate(root):
 
         # Display total profit
         tk.Label(result_frame, text=f"Całkowity zysk: {total_profit}", bg=bg_color, fg=fg_color).pack(pady=10)
-
+        tk.Label(result_frame, text=f"Całkowite koszty zakupu: {total_purchase_cost}", bg=bg_color, fg=fg_color).pack(pady=10)
+        
+        # Display total transport cost
+        tk.Label(result_frame, text=f"Całkowite koszty transportu: {total_transport_cost}", bg=bg_color, fg=fg_color).pack(pady=10)
+        
+        # Display total revenue
+        tk.Label(result_frame, text=f"Całkowity przychód: {total_revenue}", bg=bg_color, fg=fg_color).pack(pady=10)
         # Frame for tables
         tables_frame = tk.Frame(result_frame, bg=bg_color)
         tables_frame.pack(pady=5)
