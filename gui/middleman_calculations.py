@@ -1,6 +1,6 @@
 import tkinter as tk
 from tkinter import ttk
-
+from tkinter import messagebox
 import numpy as np
 from util.middleman import MiddleMan
 
@@ -22,13 +22,13 @@ def generate_fields_and_calculate(root):
 
         # Header labels
         tk.Label(fields_frame, text="", bg=bg_color, fg=fg_color).grid(row=0, column=0, padx=10, pady=5)
-        tk.Label(fields_frame, text="Supply", bg=bg_color, fg=fg_color).grid(row=1, column=1, padx=10, pady=5)
+        tk.Label(fields_frame, text="Podaż", bg=bg_color, fg=fg_color).grid(row=1, column=1, padx=10, pady=5)
         for i in range(num_consumers):
-            tk.Label(fields_frame, text=f"Customer {i+1}", bg=bg_color, fg=fg_color).grid(row=1, column=i+2, padx=10, pady=5)
-        tk.Label(fields_frame, text="Purchase price", bg=bg_color, fg=fg_color).grid(row=1, column=num_consumers+2, padx=10, pady=5)
+            tk.Label(fields_frame, text=f"Klient {i+1}", bg=bg_color, fg=fg_color).grid(row=1, column=i+2, padx=10, pady=5)
+        tk.Label(fields_frame, text="Cena zakupu", bg=bg_color, fg=fg_color).grid(row=1, column=num_consumers+2, padx=10, pady=5)
 
         # Demand labels and entries
-        tk.Label(fields_frame, text="Demand", bg=bg_color, fg=fg_color).grid(row=0, column=1, padx=10, pady=5)
+        tk.Label(fields_frame, text="Popyt", bg=bg_color, fg=fg_color).grid(row=0, column=1, padx=10, pady=5)
         demand_entries = []
         for i in range(num_consumers):
             demand_entry = tk.Entry(fields_frame)
@@ -43,7 +43,7 @@ def generate_fields_and_calculate(root):
         selling_price_entries = []
 
         for i in range(num_suppliers):
-            tk.Label(fields_frame, text=f"Supplier {i+1}", bg=bg_color, fg=fg_color).grid(row=i+2, column=0, padx=10, pady=5)
+            tk.Label(fields_frame, text=f"Dostawca {i+1}", bg=bg_color, fg=fg_color).grid(row=i+2, column=0, padx=10, pady=5)
             supply_entry = tk.Entry(fields_frame)
             supply_entry.grid(row=i+2, column=1, padx=10, pady=5)
             supply_entries.append(supply_entry)
@@ -60,7 +60,7 @@ def generate_fields_and_calculate(root):
             buying_price_entries.append(buying_price_entry)
 
         # Selling price labels and entries
-        tk.Label(fields_frame, text="Selling price", bg=bg_color, fg=fg_color).grid(row=num_suppliers+2, column=1, padx=10, pady=5)
+        tk.Label(fields_frame, text="Cena sprzedaży", bg=bg_color, fg=fg_color).grid(row=num_suppliers+2, column=1, padx=10, pady=5)
         for i in range(num_consumers):
             selling_price_entry = tk.Entry(fields_frame)
             selling_price_entry.grid(row=num_suppliers+2, column=i+2, padx=10, pady=5)
@@ -71,13 +71,25 @@ def generate_fields_and_calculate(root):
         calculate_button = ttk.Button(fields_frame, text="Oblicz", command=lambda: calculate(num_suppliers, num_consumers, supply_entries, demand_entries, transport_cost_entries, buying_price_entries, selling_price_entries))
         calculate_button.grid(row=num_suppliers+3, columnspan=num_consumers+3, pady=10)
 
+    def validate_integer(value):
+        try:
+            int_value = int(value)
+            if int_value < 0:
+                raise ValueError("Wartość musi być liczbą nieujemną.")
+            return int_value
+        except ValueError:
+            raise ValueError("Wprowadzono nieprawidłową wartość. Proszę wpisać wszystkie liczby całkowite nieujemne.")
+
     def calculate(num_suppliers, num_consumers, supply_entries, demand_entries, transport_cost_entries, buying_price_entries, selling_price_entries):
-        # Collecting data from entries
-        supplies = [int(entry.get()) for entry in supply_entries]
-        demands = [int(entry.get()) for entry in demand_entries]
-        transport_costs = [[int(entry.get()) for entry in row] for row in transport_cost_entries]
-        buying_prices = [int(entry.get()) for entry in buying_price_entries]
-        selling_prices = [int(entry.get()) for entry in selling_price_entries]
+        try:
+            supplies = [validate_integer(entry.get()) for entry in supply_entries]
+            demands = [validate_integer(entry.get()) for entry in demand_entries]
+            transport_costs = [[validate_integer(entry.get()) for entry in row] for row in transport_cost_entries]
+            buying_prices = [validate_integer(entry.get()) for entry in buying_price_entries]
+            selling_prices = [validate_integer(entry.get()) for entry in selling_price_entries]
+        except ValueError as e:
+            messagebox.showerror("Błąd - wpisz poprawnie wszystkie liczby", str(e))
+            return
         
         mm = MiddleMan()
 
