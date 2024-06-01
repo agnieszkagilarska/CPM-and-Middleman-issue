@@ -1,6 +1,9 @@
 import tkinter as tk
 from tkinter import ttk
 
+import numpy as np
+from util.middleman import MiddleMan
+
 def generate_fields_and_calculate(root):
     bg_color = '#494949'
     fg_color = 'white'
@@ -75,11 +78,25 @@ def generate_fields_and_calculate(root):
         transport_costs = [[int(entry.get()) for entry in row] for row in transport_cost_entries]
         buying_prices = [int(entry.get()) for entry in buying_price_entries]
         selling_prices = [int(entry.get()) for entry in selling_price_entries]
+        
+        mm = MiddleMan()
+
+        for i in range(num_suppliers):
+            mm.add_supplier(f'D{i+1}', supplies[i], buying_prices[i])
+
+        for j in range(num_consumers):
+            mm.add_receiver(f'O{j+1}', demands[j], selling_prices[j])
+        
+        mm.add_transport_matrix(np.array(transport_costs))
+        
+        mm.calculate()
+
+        print(mm.add_supplier, mm.add_receiver, mm.add_transport_matrix)
 
         # Placeholder for actual calculation logic
-        total_profit = 1000  # Replace with actual calculation logic
-        unit_costs = [[20 for _ in range(num_consumers)] for _ in range(num_suppliers)]  # Placeholder
-        optimal_quantities = [[5 for _ in range(num_consumers)] for _ in range(num_suppliers)]  # Placeholder
+        total_profit = mm.calculate_overall_return()
+        unit_costs = mm.unit_profits  # Placeholder
+        optimal_quantities = mm.sales  # Placeholder
 
         # Clear previous results
         for widget in result_frame.winfo_children():
