@@ -130,7 +130,7 @@ def generate_fields_and_calculate(root):
         tables_frame.pack(pady=5)
 
         # Display unit costs table
-        unit_costs_label = tk.Label(tables_frame, text="Koszty jednostkowe", bg=bg_color, fg=fg_color)
+        unit_costs_label = tk.Label(tables_frame, text="Zyski jednostkowe", bg=bg_color, fg=fg_color)
         unit_costs_label.grid(row=0, column=0, padx=10, pady=5)
         unit_costs_frame = tk.Frame(tables_frame, bg=bg_color)
         unit_costs_frame.grid(row=1, column=0, padx=10, pady=5)
